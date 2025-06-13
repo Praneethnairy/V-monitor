@@ -1,8 +1,15 @@
 import docker
 from logger import get_logger
+import json
+import os
+import sys
 
 class ContainerMonitor:
     def __init__(self):
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Change to the script directory to ensure relative paths work
+        os.chdir(script_dir)
         self.client = docker.from_env()
         self.logger = get_logger(__name__)
 
@@ -45,9 +52,11 @@ class ContainerMonitor:
             self.logger.error(f"Error getting container stats: {e}")
             return []
 
-# if __name__ == "__main__":
-#     logger = get_logger(__name__)
-#     monitor = ContainerMonitor()
-#     stats = monitor.get_all_containers_stats()
-#     for stat in stats:
-#         logger.info(stat)
+if __name__ == "__main__":
+    try:
+        monitor = ContainerMonitor()
+        result = monitor.get_all_containers_stats()
+        print(json.dumps(result))
+    except Exception as e:
+        print(json.dumps({"error": str(e)}), file=sys.stderr)
+        sys.exit(1)
